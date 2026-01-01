@@ -8,5 +8,4 @@
     {% for post in posts %}
         <p><a href="{% url 'viewpost' post.id %}">{{post.title}} {{post.created_at}}</a>
     {% endfor %}
-    <p><a href="{% url 'newpost' %}">NEW POST</a></p>
 {% endblock %}
