@@ -1,0 +1,26 @@
+{% extends "./base.html" %}
+{% block content %}
+    <!-- <h1>{{post.title}}</h1>
+    <h2>{{post.author}} {{post.created_at}}</h2>
+    <p>{{post.content}}</p> -->
+    {% for post in page_obj %}
+        {{post.author}} {{post.created_at}}
+        <div>
+                    {{post.content}}
+        </div>
+
+    {% endfor %}
+    <div class="pagination">
+        {% if page_obj.has_previous %}
+            <a href="?page={{ page_obj.previous_page_number }}">Previous</a>
+        {% endif %}
+
+        <span>
+            Page {{ page_obj.number }} of {{ page_obj.paginator.num_pages }}
+        </span>
+
+        {% if page_obj.has_next %}
+            <a href="?page={{ page_obj.next_page_number }}">Next</a>
+        {% endif %}
+    </div>
+{% endblock %}
