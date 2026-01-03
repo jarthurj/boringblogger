@@ -7,11 +7,12 @@ from django.core.paginator import Paginator
 
 @login_required
 def dashboard(request):
-    posts = Post.objects.filter(author=request.user)
-    context={
-        'posts':posts
-    }
-    return render(request, "blogapp/dashboard.html", context)
+    posts = Post.objects.all().order_by('-created_at')
+
+    paginator = Paginator(posts,1)
+    page_number = request.GET.get('page')
+    page_obj = paginator.get_page(page_number)
+    return render(request,'blogapp/postlist.html',{'page_obj':page_obj})
 
 @login_required
 def newpost(request):
