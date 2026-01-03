@@ -31,4 +31,11 @@
             <a href="?page={{ page_obj.next_page_number }}" class="px-4 py-2 text-sm bg-gray-100 rounded hover:bg-gray-200">Next</a>
         {% endif %}
     </div>
+    <div class="pagination flex justify-center">
+        {% if user.is_authenticated %}
+            <a href="" class="px-4 py-2 text-sm bg-gray-100 rounded hover:bg-gray-200">Update</a>
+            <a href="{% url 'delete' page_obj.0.id %}" class="px-4 py-2 text-sm bg-gray-100 rounded hover:bg-gray-200">Delete</a>
+
+        {% endif %}
+    </div>
 {% endblock %}

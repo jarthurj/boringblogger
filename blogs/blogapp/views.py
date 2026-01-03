@@ -44,3 +44,9 @@ def postlist(request):
 
 def home(request):
     return render(request, "blogapp/home.html", {"posts":Post.objects.all()})
+
+@login_required
+def deletepost(request,pk):
+    post = Post.objects.get(id=pk)
+    post.delete()
+    return redirect("/blogapp/dashboard/?page=1")
