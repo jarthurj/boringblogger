@@ -28,8 +28,8 @@ def newpost(request):
 
 
 
-def viewpost(request,pk):
-    return render(request,"blogapp/viewpost.html",{"post":Post.objects.get(id=pk)})
+# def viewpost(request,pk):
+#     return render(request,"blogapp/viewpost.html",{"post":Post.objects.get(id=pk)})
 
 
 def postlist(request):
