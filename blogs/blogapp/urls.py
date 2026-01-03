@@ -6,5 +6,6 @@ urlpatterns = [
     path('newpost/',views.newpost,name="newpost"),
     path('delete/<int:pk>',views.deletepost,name="delete"),
     # path('home/',views.home,name="home"),
-    path('postlist/',views.postlist,name="postlist")
+    path('postlist/',views.postlist,name="postlist"),
+    path('editpost/<int:pk>',views.editpost,name="editpost")
 ]
