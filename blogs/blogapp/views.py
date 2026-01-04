@@ -4,7 +4,7 @@ from django.contrib.auth.decorators import login_required
 from .models import Post
 from .forms import PostForm
 from django.core.paginator import Paginator
-
+from django.contrib import messages
 @login_required
 def dashboard(request):
     posts = Post.objects.all().order_by('-created_at')
@@ -18,6 +18,7 @@ def dashboard(request):
 def newpost(request):
     if request.method=="POST":
         form = PostForm(request.POST)
+        messages.success(request, "Post created!")
         if form.is_valid():
             post = form.save(commit=False)
             post.author = request.user
@@ -47,6 +48,7 @@ def home(request):
 
 @login_required
 def deletepost(request,pk):
+    messages.success(request, "Post created!")
     post = Post.objects.get(id=pk)
     post.delete()
     return redirect("/blogapp/dashboard/?page=1")
@@ -54,6 +56,7 @@ def deletepost(request,pk):
 @login_required
 def editpost(request,pk):
     if request.method=="POST":
+        messages.success(request, "Post created!")
         form = PostForm(request.POST)
         if form.is_valid():
             post = form.save(commit=False)
@@ -61,7 +64,7 @@ def editpost(request,pk):
             post.save()
             return redirect("dashboard")
     else:
-        post = Post.objects.get(id=pk)
-        # post = get_object_or_404(Post, id=pk, author=request.user)
+        # post = Post.objects.get(id=pk)
+        post = get_object_or_404(Post, id=pk, author=request.user)
         form = PostForm(instance=post)
     return render(request, "blogapp/editpost.html",{"form":form})
