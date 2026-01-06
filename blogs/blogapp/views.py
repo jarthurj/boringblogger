@@ -5,18 +5,56 @@ from .models import Post
 from .forms import PostForm
 from django.core.paginator import Paginator
 from django.contrib import messages
-@login_required
-def dashboard(request):
-    posts = Post.objects.all().order_by('-created_at')
+from django.views import View
+from django.views.generic import ListView
+from django.contrib.auth.mixins import LoginRequiredMixin
 
-    paginator = Paginator(posts,1)
-    page_number = request.GET.get('page')
-    page_obj = paginator.get_page(page_number)
-    return render(request,'blogapp/postlist.html',{'page_obj':page_obj})
+# @login_required
+# def dashboard(request):
+#     posts = Post.objects.all().order_by('-created_at')
+#     paginator = Paginator(posts,1)
+#     page_number = request.GET.get('page')
+#     page_obj = paginator.get_page(page_number)
+#     return render(request,'blogapp/postlist.html',{'page_obj':page_obj})
 
-@login_required
-def newpost(request):
-    if request.method=="POST":
+
+class Dashboard(LoginRequiredMixin,ListView):
+    model = Post
+    template_name = 'blogapp/postlist.html'
+    paginate_by = 1
+    ordering = ["-created_at"]
+
+    def get_queryset(self):
+        return Post.objects.filter(author=self.request.user)
+    
+    # def get(self, request):
+    #     posts = Post.objects.filter(author=self.request.user).order_by('-created_at')
+    #     paginator = Paginator(posts,1)
+    #     page_number = request.GET.get('page')
+    #     page_obj = paginator.get_page(page_number)
+    #     return render(request,
+    #                   'blogapp/postlist.html',
+    #                   {'page_obj':page_obj})
+
+# @login_required
+# def newpost(request):
+#     if request.method=="POST":
+#         form = PostForm(request.POST)
+#         messages.success(request, "Post created!")
+#         if form.is_valid():
+#             post = form.save(commit=False)
+#             post.author = request.user
+#             post.save()
+#             return redirect("dashboard")
+#     else:
+#         form = PostForm()
+#     return render(request, "blogapp/newpost.html",{"form":form})
+
+class NewPost(LoginRequiredMixin,View):
+    def get(self,request):
+        form = PostForm()
+        return render(request, "blogapp/newpost.html",{"form":form})
+    def post(self,request):
         form = PostForm(request.POST)
         messages.success(request, "Post created!")
         if form.is_valid():
@@ -24,12 +62,7 @@ def newpost(request):
             post.author = request.user
             post.save()
             return redirect("dashboard")
-    else:
-        form = PostForm()
-    return render(request, "blogapp/newpost.html",{"form":form})
-
-
-
+        return render(request, "blogapp/newpost.html",{"form":form})
 # def viewpost(request,pk):
 #     return render(request,"blogapp/viewpost.html",{"post":Post.objects.get(id=pk)})
 
