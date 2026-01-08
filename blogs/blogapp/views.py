@@ -1,14 +1,14 @@
 from django.shortcuts import render,redirect,get_object_or_404
-from django.http import HttpResponse
-from django.contrib.auth.decorators import login_required
+# from django.http import HttpResponse
+# from django.contrib.auth.decorators import login_required
 from .models import Post
 from .forms import PostForm
-from django.core.paginator import Paginator
+# from django.core.paginator import Paginator
 from django.contrib import messages
 from django.views import View
-from django.views.generic import ListView
-from django.contrib.auth.mixins import LoginRequiredMixin
-
+from django.views.generic import ListView, DeleteView
+from django.contrib.auth.mixins import LoginRequiredMixin,UserPassesTestMixin
+from django.urls import reverse_lazy
 # @login_required
 # def dashboard(request):
 #     posts = Post.objects.all().order_by('-created_at')
@@ -27,14 +27,6 @@ class Dashboard(LoginRequiredMixin,ListView):
     def get_queryset(self):
         return Post.objects.filter(author=self.request.user)
     
-    # def get(self, request):
-    #     posts = Post.objects.filter(author=self.request.user).order_by('-created_at')
-    #     paginator = Paginator(posts,1)
-    #     page_number = request.GET.get('page')
-    #     page_obj = paginator.get_page(page_number)
-    #     return render(request,
-    #                   'blogapp/postlist.html',
-    #                   {'page_obj':page_obj})
 
 # @login_required
 # def newpost(request):
@@ -54,6 +46,7 @@ class NewPost(LoginRequiredMixin,View):
     def get(self,request):
         form = PostForm()
         return render(request, "blogapp/newpost.html",{"form":form})
+    
     def post(self,request):
         form = PostForm(request.POST)
         messages.success(request, "Post created!")
@@ -67,37 +60,75 @@ class NewPost(LoginRequiredMixin,View):
 #     return render(request,"blogapp/viewpost.html",{"post":Post.objects.get(id=pk)})
 
 
-def postlist(request):
-    posts = Post.objects.all().order_by('-created_at')
+# def postlist(request):
+#     posts = Post.objects.all().order_by('-created_at')
+#     paginator = Paginator(posts,1)
+#     page_number = request.GET.get('page')
+#     page_obj = paginator.get_page(page_number)
+#     return render(request,'blogapp/postlist.html',{'page_obj':page_obj})
 
-    paginator = Paginator(posts,1)
-    page_number = request.GET.get('page')
-    page_obj = paginator.get_page(page_number)
-    return render(request,'blogapp/postlist.html',{'page_obj':page_obj})
+
+class PostList(ListView):
+    model = Post
+    template_name = 'blogapp/postlist.html'
+    paginate_by = 1
+    ordering = ["-created_at"]
+
+    # def get_queryset(self):
+    #     return Post.objects.all()
 
 
-def home(request):
-    return render(request, "blogapp/home.html", {"posts":Post.objects.all()})
+# def home(request):
+#     return render(request, "blogapp/home.html", {"posts":Post.objects.all()})
 
-@login_required
-def deletepost(request,pk):
-    messages.success(request, "Post created!")
-    post = Post.objects.get(id=pk)
-    post.delete()
-    return redirect("/blogapp/dashboard/?page=1")
+# @login_required
+# def deletepost(request,pk):
+#     messages.success(request, "Post created!")
+#     post = Post.objects.get(id=pk)
+#     post.delete()
+#     return redirect("/blogapp/dashboard/?page=1")
 
-@login_required
-def editpost(request,pk):
-    if request.method=="POST":
+
+class DeletePost(LoginRequiredMixin,DeleteView,UserPassesTestMixin):
+    model = Post
+    success_url = reverse_lazy('dashboard')
+    def test_func(self):
+        return self.get_object().author == self.request.user
+    def form_valid(self, form):
+        messages.success(self.request, "Post deleted!")
+        return super().form_valid(form)
+    
+
+# @login_required
+# def editpost(request,pk):
+#     if request.method=="POST":
+#         messages.success(request, "Post created!")
+#         form = PostForm(request.POST)
+#         if form.is_valid():
+#             post = form.save(commit=False)
+#             post.author = request.user
+#             post.save()
+#             return redirect("dashboard")
+#     else:
+#         # post = Post.objects.get(id=pk)
+#         post = get_object_or_404(Post, id=pk, author=request.user)
+#         form = PostForm(instance=post)
+#     return render(request, "blogapp/editpost.html",{"form":form})
+
+class EditPost(LoginRequiredMixin,View):
+    def get(self,request,pk):
+        # post = Post.objects.get(id=pk)
+        post = get_object_or_404(Post, id=pk, author=request.user)
+        form = PostForm(instance=post)
+        return render(request, "blogapp/newpost.html",{"form":form})
+    
+    def post(self,request,pk):
+        post = get_object_or_404(Post, id=pk, author=request.user)
+        form = PostForm(request.POST,instance=post)
         messages.success(request, "Post created!")
-        form = PostForm(request.POST)
         if form.is_valid():
             post = form.save(commit=False)
             post.author = request.user
             post.save()
             return redirect("dashboard")
-    else:
-        # post = Post.objects.get(id=pk)
-        post = get_object_or_404(Post, id=pk, author=request.user)
-        form = PostForm(instance=post)
-    return render(request, "blogapp/editpost.html",{"form":form})
+        return render(request, "blogapp/newpost.html",{"form":form})
