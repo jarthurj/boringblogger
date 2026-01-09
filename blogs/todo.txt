@@ -1,0 +1,7 @@
+1 Finish writing tests
+2 Post detail page
+3 Comment system
+4 User profile page
+5 Tag/category filtering
+6 Search
+7 REST API (later)
