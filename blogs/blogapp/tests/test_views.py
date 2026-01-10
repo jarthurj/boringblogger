@@ -20,7 +20,30 @@ class DashboardViewTest(TestCase):
 
         self.assertEqual(response.status_code, 200)
         self.assertTemplateUsed(response, "blogapp/postlist.html")
-        
+
+    def test_dashboard_requires_login(self):
+            self.client.logout()
+            response = self.client.get(reverse("dashboard"))
+            self.assertEqual(response.status_code,302)
+            self.assertRedirects(
+                response,
+                "/login/?next=/blogapp/dashboard/"
+            )
+
+class NewPostViewTest(TestCase):
+    def setUp(self):
+        self.user = User.objects.create_user(
+            username="testuser",password="assASSass123"
+        )
+        self.client.login(username="testuser",password="assASSass123")
+    def test_newpost_requires_login(self):
+        self.client.logout()
+        response = self.client.get(reverse("newpost"))
+        self.assertEqual(response.status_code,302)
+        self.assertRedirects(
+            response,
+            "/login/?next=/blogapp/newpost/"
+        )
     def test_create_post(self):
         response = self.client.post(
             reverse("newpost"),
