@@ -36,6 +36,10 @@ class NewPostViewTest(TestCase):
             username="testuser",password="assASSass123"
         )
         self.client.login(username="testuser",password="assASSass123")
+
+    def test_newpost_loads(self):
+         response = self.client.get(reverse("newpost"))
+         self.assertEqual(response.status_code,200)
     def test_newpost_requires_login(self):
         self.client.logout()
         response = self.client.get(reverse("newpost"))
