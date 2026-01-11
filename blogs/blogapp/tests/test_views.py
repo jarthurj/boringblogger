@@ -65,4 +65,22 @@ class PostList(TestCase):
          self.assertEqual(response.status_code,200)
 
 class DeletePost(TestCase):
-    pass
+    def setUp(self):
+        self.user = User.objects.create_user(
+            username="testuser",password="assASSass123"
+        )
+        self.client.login(username="testuser",password="assASSass123")
+
+
+    def test_delete_requires_login(self):
+        self.client.logout()
+        response = self.client.post(
+            reverse("delete",
+                    {"pk":1}
+                )
+            )
+        self.assertEqual(response.status_code,302)
+        self.assertRedirects(
+            response,
+            "/login/?next=/blogapp/newpost/"
+        )
