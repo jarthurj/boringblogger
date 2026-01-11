@@ -40,6 +40,7 @@ class NewPostViewTest(TestCase):
     def test_newpost_loads(self):
          response = self.client.get(reverse("newpost"))
          self.assertEqual(response.status_code,200)
+
     def test_newpost_requires_login(self):
         self.client.logout()
         response = self.client.get(reverse("newpost"))
@@ -58,4 +59,10 @@ class NewPostViewTest(TestCase):
         )
         self.assertEqual(response.status_code,302)
         self.assertTrue(Post.objects.filter(title="NewPost").exists())
-# class CreateViewTest(TestCase):
+class PostList(TestCase):
+    def test_postlist_loads(self):
+         response = self.client.get(reverse("postlist"))
+         self.assertEqual(response.status_code,200)
+
+class DeletePost(TestCase):
+    pass

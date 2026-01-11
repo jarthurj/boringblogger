@@ -94,6 +94,7 @@ class DeletePost(LoginRequiredMixin,DeleteView,UserPassesTestMixin):
     success_url = reverse_lazy('dashboard')
     def test_func(self):
         return self.get_object().author == self.request.user
+    
     def form_valid(self, form):
         messages.success(self.request, "Post deleted!")
         return super().form_valid(form)
