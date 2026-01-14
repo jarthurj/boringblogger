@@ -71,16 +71,75 @@ class DeletePost(TestCase):
         )
         self.client.login(username="testuser",password="assASSass123")
 
-
     def test_delete_requires_login(self):
         self.client.logout()
+        p = Post.objects.create(
+            title="Test",
+            content="Content",
+            author=self.user
+        )
         response = self.client.post(
-            reverse("delete",
-                    {"pk":1}
-                )
+            reverse("delete",args=[p.id])
             )
         self.assertEqual(response.status_code,302)
+        redirect_url = "/login/?next=/blogapp/delete/"+str(p.id)+"/"
         self.assertRedirects(
             response,
-            "/login/?next=/blogapp/newpost/"
+            redirect_url
         )
+
+    def test_delete(self):
+        p = Post.objects.create(
+            title="Test",
+            content="Content",
+            author=self.user
+        )
+        p_id = p.id
+        p_user = p.author
+        response = self.client.post(
+            reverse("delete",args=[p_id])
+            )
+        self.assertEqual(Post.objects.filter(id=p_id).exists(),False)
+        self.assertEqual(p_user,self.user)
+        
+class EditPost(TestCase):
+    def setUp(self):
+        self.user = User.objects.create_user(
+            username="testuser",password="assASSass123"
+        )
+        self.client.login(username="testuser",password="assASSass123")
+
+    def test_edit_requires_login(self):
+        self.client.logout()
+        p = Post.objects.create(
+            title="Test",
+            content="Content",
+            author=self.user
+        )
+        response = self.client.post(
+            reverse("editpost",args=[p.id])
+            )
+        self.assertEqual(response.status_code,302)
+        redirect_url = "/login/?next=/blogapp/editpost/"+str(p.id)+"/"
+        self.assertRedirects(
+            response,
+            redirect_url
+        )
+    def test_edit(self):
+        p = Post.objects.create(
+            title="Test",
+            content="Content",
+            author=self.user
+        )
+        response = self.client.post(
+            reverse("editpost",args=[p.id]),
+            {
+                "title":"THIS IS THE NEW TITLE",
+                "content":"NEW CONTENT"
+            }
+        )
+        self.assertEqual(response.status_code,302)
+        p.refresh_from_db()
+        self.assertEqual(p.title, "THIS IS THE NEW TITLE")
+        self.assertEqual(p.content, "NEW CONTENT")
+        self.assertEqual(p.author,self.user)
