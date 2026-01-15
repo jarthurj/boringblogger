@@ -40,8 +40,10 @@ class PostList(ListView):
 class DeletePost(LoginRequiredMixin,DeleteView,UserPassesTestMixin):
     model = Post
     success_url = reverse_lazy('dashboard')
-    def test_func(self):
-        return self.get_object().author == self.request.user
+    raise_exception = True
+    
+    def get_queryset(self):
+        return Post.objects.filter(author=self.request.user)
     
     def form_valid(self, form):
         messages.success(self.request, "Post deleted!")
@@ -49,7 +51,6 @@ class DeletePost(LoginRequiredMixin,DeleteView,UserPassesTestMixin):
 
 class EditPost(LoginRequiredMixin,View):
     def get(self,request,pk):
-        # post = Post.objects.get(id=pk)
         post = get_object_or_404(Post, id=pk, author=request.user)
         form = PostForm(instance=post)
         return render(request, "blogapp/newpost.html",{"form":form})

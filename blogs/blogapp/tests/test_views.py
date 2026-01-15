@@ -2,6 +2,7 @@ from django.test import TestCase
 from django.urls import reverse
 from django.contrib.auth.models import User
 from blogapp.models import Post
+from django.conf import settings
 
 class DashboardViewTest(TestCase):
     def setUp(self):
@@ -20,6 +21,8 @@ class DashboardViewTest(TestCase):
 
         self.assertEqual(response.status_code, 200)
         self.assertTemplateUsed(response, "blogapp/postlist.html")
+        self.assertContains(response, "Test")
+        self.assertEqual(len(response.context["object_list"]),1)
 
     def test_dashboard_requires_login(self):
             self.client.logout()
@@ -27,7 +30,7 @@ class DashboardViewTest(TestCase):
             self.assertEqual(response.status_code,302)
             self.assertRedirects(
                 response,
-                "/login/?next=/blogapp/dashboard/"
+                f"/{settings.LOGIN_URL}/?next={reverse('dashboard')}"
             )
 
 class NewPostViewTest(TestCase):
@@ -38,8 +41,9 @@ class NewPostViewTest(TestCase):
         self.client.login(username="testuser",password="assASSass123")
 
     def test_newpost_loads(self):
-         response = self.client.get(reverse("newpost"))
-         self.assertEqual(response.status_code,200)
+        response = self.client.get(reverse("newpost"))
+        self.assertEqual(response.status_code,200)
+        self.assertTemplateUsed(response,"blogapp/newpost.html")
 
     def test_newpost_requires_login(self):
         self.client.logout()
@@ -47,22 +51,27 @@ class NewPostViewTest(TestCase):
         self.assertEqual(response.status_code,302)
         self.assertRedirects(
             response,
-            "/login/?next=/blogapp/newpost/"
+            f"/{settings.LOGIN_URL}/?next={reverse('newpost')}"
         )
+
     def test_create_post(self):
         response = self.client.post(
             reverse("newpost"),
             {
                 "title":"NewPost",
-                "content":"Post Content"
+                "content":"Post Content",
             }
         )
         self.assertEqual(response.status_code,302)
-        self.assertTrue(Post.objects.filter(title="NewPost").exists())
+        post = Post.objects.filter(title="NewPost").first()
+        self.assertTrue(post)
+        self.assertEqual(self.user,post.author)
+
 class PostList(TestCase):
     def test_postlist_loads(self):
          response = self.client.get(reverse("postlist"))
          self.assertEqual(response.status_code,200)
+         self.assertTemplateUsed(response,"blogapp/postlist.html")
 
 class DeletePost(TestCase):
     def setUp(self):
@@ -81,12 +90,12 @@ class DeletePost(TestCase):
         response = self.client.post(
             reverse("delete",args=[p.id])
             )
-        self.assertEqual(response.status_code,302)
-        redirect_url = "/login/?next=/blogapp/delete/"+str(p.id)+"/"
-        self.assertRedirects(
-            response,
-            redirect_url
-        )
+        self.assertEqual(response.status_code,403)
+        # self.assertRedirects(
+        #     response,
+        #     f"/{settings.LOGIN_URL}/?next={reverse('delete',args=[p.id])}"
+        # )
+        self.assertTrue(Post.objects.filter(id=p.id).exists())
 
     def test_delete(self):
         p = Post.objects.create(
@@ -95,13 +104,29 @@ class DeletePost(TestCase):
             author=self.user
         )
         p_id = p.id
-        p_user = p.author
         response = self.client.post(
             reverse("delete",args=[p_id])
             )
         self.assertEqual(Post.objects.filter(id=p_id).exists(),False)
-        self.assertEqual(p_user,self.user)
-        
+
+    def test_user_cant_delete_others_post(self):
+        other_user = User.objects.create_user(
+            username="other", password="pass123"
+        )
+
+        post = Post.objects.create(
+            title="Test",
+            content="Content",
+            author=other_user
+        )
+
+        response = self.client.post(
+            reverse("delete", args=[post.id])
+        )
+
+        self.assertEqual(response.status_code, 404)
+        self.assertTrue(Post.objects.filter(id=post.id).exists())
+ 
 class EditPost(TestCase):
     def setUp(self):
         self.user = User.objects.create_user(
@@ -125,6 +150,16 @@ class EditPost(TestCase):
             response,
             redirect_url
         )
+    def test_edit_loads(self):
+        p = Post.objects.create(
+            title="Test",
+            content="Content",
+            author=self.user
+        )
+        response = self.client.get(reverse("editpost",args=[p.id]))
+        self.assertEqual(response.status_code, 200)
+        self.assertTemplateUsed(response, "blogapp/newpost.html")
+
     def test_edit(self):
         p = Post.objects.create(
             title="Test",
