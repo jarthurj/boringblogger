@@ -1,7 +1,7 @@
 from django.test import TestCase
 from django.urls import reverse
 from django.contrib.auth.models import User
-from blogapp.models import Post
+from blogapp.models import Post,Comment
 from django.conf import settings
 
 class DashboardViewTest(TestCase):
@@ -150,6 +150,7 @@ class EditPost(TestCase):
             response,
             redirect_url
         )
+
     def test_edit_loads(self):
         p = Post.objects.create(
             title="Test",
@@ -178,3 +179,38 @@ class EditPost(TestCase):
         self.assertEqual(p.title, "THIS IS THE NEW TITLE")
         self.assertEqual(p.content, "NEW CONTENT")
         self.assertEqual(p.author,self.user)
+
+class NewComment(TestCase):
+    def setUp(self):
+        self.user = User.objects.create_user(
+            username="testuser",password="assASSass123"
+        )
+        self.post = Post.objects.create(
+            title="Test",
+            content="Content",
+            author=self.user
+        )
+        self.client.login(username="testuser",password="assASSass123")
+    def test_new_comment_loads(self):
+        response = self.client.get(reverse("newcomment",args=[self.post.id]))
+        self.assertEqual(response.status_code,200)
+        self.assertTemplateUsed(response,"blogapp/newcomment.html")
+    def test_comment_posts(self):
+        c = Comment.objects.create(
+            content = "CONTENT",
+            author = self.user,
+            post = self.post
+        )
+        self.assertTrue(Comment.objects.filter(id=c.id).exists())
+
+    def test_comment_requires_login(self):
+        self.client.logout()
+        response = self.client.post(reverse('newcomment',args=[self.post.id]),
+                                    {
+                                        "content":"BUTTS",
+                                        "author":self.user,
+                                    })
+        self.assertEqual(response.status_code,302)
+        self.assertIsNone(Comment.objects.all().first())
+
+

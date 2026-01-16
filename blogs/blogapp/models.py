@@ -6,10 +6,13 @@ class Post(models.Model):
     content = models.TextField()
     author = models.ForeignKey(User,on_delete=models.CASCADE,related_name="posts")
     created_at = models.DateTimeField(auto_now_add=True)
-    # comment = models.ForeignKey(Comment,on_delete=models.CASCADE,related_name="comments")
+    tag = models.ManyToManyField(Tag,related_name="tags")
 
 class Comment(models.Model):
     content = models.TextField()
     author = models.ForeignKey(User,on_delete=models.CASCADE,related_name="comments")
     created_at = models.DateTimeField(auto_now_add=True)
     post = models.ForeignKey(Post,on_delete=models.CASCADE,related_name="comments")
+
+class Tag(models.Model):
+    title = models.CharField(max_length=100)
