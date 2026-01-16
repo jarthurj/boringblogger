@@ -1,6 +1,6 @@
 from django.shortcuts import render,redirect,get_object_or_404
-from .models import Post, Comment
-from .forms import PostForm,CommentForm
+from .models import Post, Comment, Tag
+from .forms import PostForm,CommentForm,TagFormSet
 from django.contrib import messages
 from django.views import View
 from django.views.generic import ListView, DeleteView
@@ -18,18 +18,31 @@ class Dashboard(LoginRequiredMixin,ListView):
 
 class NewPost(LoginRequiredMixin,View):
     def get(self,request):
-        form = PostForm()
-        return render(request, "blogapp/newpost.html",{"form":form})
+        post_form = PostForm()
+        tag_form = TagFormSet(queryset=Tag.objects.none())
+        context = {
+            "post_form":post_form,
+            "tag_form":tag_form
+        }
+        return render(request, "blogapp/newpost.html",context)
     
     def post(self,request):
-        form = PostForm(request.POST)
+        post_form = PostForm(request.POST)
+        tag_form = TagFormSet(request.POST,queryset=Tag.objects.none())
+        context = {
+            "post_form":post_form,
+            "tag_form":tag_form
+        }
         messages.success(request, "Post created!")
-        if form.is_valid():
-            post = form.save(commit=False)
+        if post_form.is_valid() and tag_form.is_valid():
+            post = post_form.save(commit=False)
             post.author = request.user
             post.save()
+            tags = tag_form.save()
+            post.tags.add(*tags)
+
             return redirect("dashboard")
-        return render(request, "blogapp/newpost.html",{"form":form})
+        return render(request, "blogapp/newpost.html",context)
 
 class PostList(ListView):
     model = Post
