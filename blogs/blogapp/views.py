@@ -3,14 +3,14 @@ from .models import Post, Comment, Tag
 from .forms import PostForm,CommentForm,TagFormSet
 from django.contrib import messages
 from django.views import View
-from django.views.generic import ListView, DeleteView
+from django.views.generic import ListView, DeleteView,DetailView
 from django.contrib.auth.mixins import LoginRequiredMixin,UserPassesTestMixin
 from django.urls import reverse_lazy
 
 class Dashboard(LoginRequiredMixin,ListView):
     model = Post
     template_name = 'blogapp/postlist.html'
-    paginate_by = 1
+    # paginate_by = 1
     ordering = ["-created_at"]
 
     def get_queryset(self):
@@ -47,7 +47,7 @@ class NewPost(LoginRequiredMixin,View):
 class PostList(ListView):
     model = Post
     template_name = 'blogapp/postlist.html'
-    paginate_by = 1
+    # paginate_by = 1
     ordering = ["-created_at"]
 
 class DeletePost(LoginRequiredMixin,DeleteView,UserPassesTestMixin):

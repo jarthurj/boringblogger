@@ -10,39 +10,6 @@
 </head>
 <body>
 
-<!--<nav class="navbar navbar-expand-lg navbar-dark bg-dark">
-  <div class="container">
-    <a class="navbar-brand" href="/dashboard/">MySite</a>
-
-
-    <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
-      <span class="navbar-toggler-icon"></span>
-    </button>
-
-
-    <div class="collapse navbar-collapse" id="navbarNav">
-      <ul class="navbar-nav ms-auto">
-        <li class="nav-item">
-          <a class="nav-link active" href="/">Home</a>
-        </li>
-        <li class="nav-item">
-          <a class="nav-link" href="/about/">About</a>
-        </li>
-        {% if user.is_authenticated %}
-        <li class="nav-item">
-          <a class="nav-link" href="/accounts/logout/">Logout</a>
-        </li>
-        {% else %}
-        <li class="nav-item">
-          <a class="nav-link" href="/accounts/login/">Login</a>
-        </li>
-        {% endif %}
-      </ul>
-    </div>
-  </div>
-</nav>
- -->
-
 <nav class="bg-white border-b border-gray-200">
   <div class="max-w-7xl mx-auto px-4">
     <div class="flex justify-between h-16 items-center">
@@ -61,6 +28,7 @@
         <a href="/" class="text-gray-600 hover:text-blue-600">Home</a>
         <a href="/about/" class="text-gray-600 hover:text-blue-600">About</a>
         <a href="/blogapp/postlist/" class="text-gray-600 hover:text-blue-600">All Posts</a>
+        <a href="/blogapp/search/" class="text-gray-600 hover:text-blue-600">Search</a>
         {% if user.is_authenticated %}
           <a href="/logout/" class="text-gray-600 hover:text-blue-600">Logout</a>
         {% else %}
