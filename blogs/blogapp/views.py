@@ -10,7 +10,7 @@ from django.urls import reverse_lazy
 class Dashboard(LoginRequiredMixin,ListView):
     model = Post
     template_name = 'blogapp/postlist.html'
-    # paginate_by = 1
+    paginate_by = 5
     ordering = ["-created_at"]
 
     def get_queryset(self):
@@ -97,3 +97,13 @@ class NewComment(LoginRequiredMixin,View):
             comment.post = Post.objects.get(id=pk)
             comment.save()
             return redirect('dashboard')
+
+class DetailPost(DetailView):
+    model = Post
+    template_name = "blogapp/detailpost.html"
+    context_object_name = "post"
+    def get_queryset(self):
+        return (
+            Post.objects.prefetch_related("tags","comments")
+        )
+    

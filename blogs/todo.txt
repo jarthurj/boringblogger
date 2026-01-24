@@ -4,4 +4,7 @@
 4 User profile page
 5 Tag/category filtering
 6 Search
+    -Need to add detail view and then move comments to there
+    -Need to make the dashbaord paginate and 5 blog posts per page
+    -
 7 REST API (later)
