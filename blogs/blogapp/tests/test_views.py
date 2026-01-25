@@ -195,6 +195,7 @@ class NewComment(TestCase):
         response = self.client.get(reverse("newcomment",args=[self.post.id]))
         self.assertEqual(response.status_code,200)
         self.assertTemplateUsed(response,"blogapp/newcomment.html")
+        
     def test_comment_posts(self):
         c = Comment.objects.create(
             content = "CONTENT",

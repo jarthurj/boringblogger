@@ -1,6 +1,6 @@
 from django.shortcuts import render,redirect,get_object_or_404
 from .models import Post, Comment, Tag
-from .forms import PostForm,CommentForm,TagFormSet
+from .forms import PostForm,CommentForm,TagFormSet,SearchForm
 from django.contrib import messages
 from django.views import View
 from django.views.generic import ListView, DeleteView,DetailView
@@ -106,4 +106,12 @@ class DetailPost(DetailView):
         return (
             Post.objects.prefetch_related("tags","comments")
         )
-    
+
+class Search(View):
+    def get(self,request):
+        return render(request, "blogapp/search.html",{"form":SearchForm()})
+    def post(self,request):
+        form = SearchForm(request.POST)
+        if form.is_valid():
+            
+            return redirect('searchlist')

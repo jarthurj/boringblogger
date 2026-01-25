@@ -2,7 +2,8 @@ from django.contrib import admin
 from django.urls import path,include
 from . import views
 from blogapp.views import (Dashboard,NewPost,PostList,
-                           DeletePost,EditPost,NewComment,DetailPost)
+                           DeletePost,EditPost,NewComment,
+                           DetailPost,Search)
 urlpatterns = [
     path('dashboard/',Dashboard.as_view(),name="dashboard"),
     path('newpost/',NewPost.as_view(),name="newpost"),
@@ -10,5 +11,6 @@ urlpatterns = [
     path('editpost/<int:pk>/',EditPost.as_view(),name='editpost'),
     path('postlist/',PostList.as_view(),name="postlist"),
     path('comment/<int:pk>/',NewComment.as_view(),name='newcomment'),
-    path('detailpost/<int:pk>',DetailPost.as_view(),name="detailpost")
+    path('detailpost/<int:pk>',DetailPost.as_view(),name="detailpost"),
+    path('search',Search.as_view(),name="search")
 ]

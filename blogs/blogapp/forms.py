@@ -16,9 +16,11 @@ class TagForm(forms.ModelForm):
         model = Tag
         fields = ['title']
         extra = 5
-
 TagFormSet = modelformset_factory(
     Tag,
     form=TagForm,
     extra=5
 )
+
+class SearchForm(forms.Form):
+    search = forms.CharField(max_length=100)
